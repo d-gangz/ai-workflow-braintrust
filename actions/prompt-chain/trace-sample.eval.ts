@@ -46,7 +46,7 @@ Eval("ai-workflow", {
   data: () => [
     { input: "Which country has the highest population?", expected: "China" },
   ],
-  task: async (input, { span }) => {
+  task: async (input) => {
     return await callModel(input);
   },
   scores: [exactMatch],

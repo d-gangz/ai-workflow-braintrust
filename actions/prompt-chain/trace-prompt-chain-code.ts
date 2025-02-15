@@ -19,28 +19,28 @@ async function generateLLMResponse(prompt: string): Promise<string> {
         model: google("gemini-2.0-flash-001"),
         // model: openai("gpt-4o-mini"),
         prompt,
-        experimental_telemetry: {
-          isEnabled: true,
-          functionId: "generateLLMResponse",
-          metadata: {
-            model: "gemini-2.0-flash-001",
-            model_type: "text generation",
-          },
-        },
+        // experimental_telemetry: {
+        //   isEnabled: true,
+        //   functionId: "generateLLMResponse",
+        //   metadata: {
+        //     model: "gemini-2.0-flash-001",
+        //     model_type: "text generation",
+        //   },
+        // },
       });
 
       // Log extended metrics if available.
       span.log({
         output: result.text,
-        metrics: {
-          prompt_tokens: result.usage?.promptTokens,
-          completion_tokens: result.usage?.completionTokens,
-          total_tokens: result.usage?.totalTokens,
-        },
+        // metrics: {
+        //   prompt_tokens: result.usage?.promptTokens,
+        //   completion_tokens: result.usage?.completionTokens,
+        //   total_tokens: result.usage?.totalTokens,
+        // },
       });
       return result.text;
     },
-    { name: "LLM Call" }
+    { name: "LLM Call", type: "llm" }
   );
 }
 
@@ -50,18 +50,24 @@ export type PromptChainResult = {
 };
 
 export async function promptChain(input: string): Promise<PromptChainResult> {
-  // Step 1: Generate outline using the input sentence.
-  const outline = await generateLLMResponse(
-    OUTLINE_PROMPT.replace("{{input_sentence}}", input)
-  );
+  return await traced(
+    async (span) => {
+      span.log({ input: input });
 
-  // Step 2: Generate the final story using the generated outline.
-  const story = await generateLLMResponse(
-    STORY_GENERATION_PROMPT.replace("{{plot_outline}}", outline)
-  );
+      // Step 1: Generate outline using the input sentence.
+      const outline = await generateLLMResponse(
+        OUTLINE_PROMPT.replace("{{input_sentence}}", input)
+      );
 
-  return {
-    outline,
-    story,
-  };
+      // Step 2: Generate the final story using the generated outline.
+      const story = await generateLLMResponse(
+        STORY_GENERATION_PROMPT.replace("{{plot_outline}}", outline)
+      );
+
+      const result = { outline, story };
+      span.log({ output: { outline: outline, story: story } });
+      return result;
+    },
+    { name: "prompt chain", type: "function" }
+  );
 }

@@ -1,3 +1,5 @@
+"use server";
+
 import { Eval } from "braintrust";
 import { promptChain } from "./prompt-chain-code";
 
@@ -16,7 +18,7 @@ Eval("ai-workflow", {
   experimentName: "trace-prompt-chain",
   data: () => inputData,
 
-  task: async (input, { span }) => {
+  task: async (input) => {
     // The detailed LLM metrics are logged inside the traced generateLLMResponse function.
     return await promptChain(input);
   },
@@ -29,5 +31,3 @@ Eval("ai-workflow", {
     model: "gemini-2.0-flash",
   },
 });
-
-// { input }: { input: string }

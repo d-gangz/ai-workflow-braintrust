@@ -52,6 +52,7 @@ Follow these rules when building the app.
 - Use `@` to import anything from the app unless otherwise specified
 - Use kebab case for all files and folders unless otherwise specified
 - Don't update shadcn components unless otherwise specified
+- use `bun` for all commands unless otherwise specified
 
 #### Env Rules
 
@@ -69,7 +70,7 @@ Follow these rules when working with types.
 - Name files like `example-types.ts`
 - All types should go in `types`
 - Make sure to export the types in `types/index.ts`
-- Prefer interfaces over type aliases
+- Prefer type aliases over interfaces
 - If referring to db types, use `@/db/schema` such as `SelectTodo` from `todos-schema.ts`
 
 An example of a type:

@@ -1,4 +1,4 @@
-// ok this worksss!!! so gotta use the currentSpan() to log the input and output of the function.
+// ok this worksss!!! so gotta use the currentSpan() to log the input and output of the function. wait actually the span.log works with the traced function.
 
 import { Eval, traced, currentSpan } from "braintrust";
 

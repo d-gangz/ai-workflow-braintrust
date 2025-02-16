@@ -32,11 +32,11 @@ async function generateLLMResponse(prompt: string): Promise<string> {
       // Log extended metrics if available.
       span.log({
         output: result.text,
-        // metrics: {
-        //   prompt_tokens: result.usage?.promptTokens,
-        //   completion_tokens: result.usage?.completionTokens,
-        //   total_tokens: result.usage?.totalTokens,
-        // },
+        metrics: {
+          prompt_tokens: result.usage?.promptTokens,
+          completion_tokens: result.usage?.completionTokens,
+          total_tokens: result.usage?.totalTokens,
+        },
       });
       return result.text;
     },
@@ -64,9 +64,11 @@ export async function promptChain(input: string): Promise<PromptChainResult> {
         STORY_GENERATION_PROMPT.replace("{{plot_outline}}", outline)
       );
 
-      const result = { outline, story };
+      //   const result = { outline, story };
+      //   span.log({ output: { outline: outline, story: story } });
       span.log({ output: { outline: outline, story: story } });
-      return result;
+      return { outline: outline, story: story };
+      //   return result;
     },
     { name: "prompt chain", type: "function" }
   );

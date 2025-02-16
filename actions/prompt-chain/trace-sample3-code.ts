@@ -3,23 +3,27 @@
 import { traced } from "braintrust";
 import { generateText } from "ai";
 import { google } from "@ai-sdk/google";
+import { OUTLINE_PROMPT, STORY_GENERATION_PROMPT } from "./prompts";
 
-const promptstart = "use {{input}} as a character in a single sentence story";
-const promptend = "use {{promptstart}} to create a single sentence ending";
 // This nested function performs part of the task and will have its own trace span.
-async function nestedFunction(prompt: string): Promise<string> {
+async function generateLLMResponse(prompt: string): Promise<string> {
   return await traced(
     async (span) => {
       // Log the start of the nested function.
       span.log({ input: prompt });
 
-      // Simulate some nested processing (for example, an LLM call or computation)
-      // const result = `Nested processed: ${input}`;
-
       const result = await generateText({
         model: google("gemini-2.0-flash-001"),
         // model: openai("gpt-4o-mini"),
         prompt,
+        // experimental_telemetry: {
+        //   isEnabled: true,
+        //   functionId: "generateLLMResponse",
+        //   metadata: {
+        //     model: "gemini-2.0-flash-001",
+        //     model_type: "text generation",
+        //   },
+        // },
       });
 
       // Log the result of the nested function.
@@ -33,33 +37,33 @@ async function nestedFunction(prompt: string): Promise<string> {
       });
       return result.text;
     },
-    { name: "nestedFunction", type: "llm" }
+    { name: "LLM Call", type: "llm" }
   );
 }
 
 export type PromptChainResult = {
-  result1: string;
-  result2: string;
+  outline: string;
+  story: string;
 };
 // The main task function, which includes a call to the nested function.
-export async function taskFunction(input: string): Promise<PromptChainResult> {
+export async function promptChain(input: string): Promise<PromptChainResult> {
   return await traced(
     async (span) => {
       // Log the beginning of the main task.
       span.log({ input: input });
 
       // Call the nested function – its trace will appear as a child span.
-      const nestedResult = await nestedFunction(
-        promptstart.replace("{{input}}", input)
+      const outline = await generateLLMResponse(
+        OUTLINE_PROMPT.replace("{{input_sentence}}", input)
       );
-      const nestedResult2 = await nestedFunction(
-        promptend.replace("{{promptstart}}", nestedResult)
+      const story = await generateLLMResponse(
+        STORY_GENERATION_PROMPT.replace("{{plot_outline}}", outline)
       );
 
       // Log the completion of the main task.
-      span.log({ output: { result1: nestedResult, result2: nestedResult2 } });
-      return { result1: nestedResult, result2: nestedResult2 };
+      span.log({ output: { outline: outline, story: story } });
+      return { outline: outline, story: story };
     },
-    { name: "taskFunction", type: "function" }
+    { name: "Prompt Chain", type: "function" }
   );
 }

@@ -1,3 +1,5 @@
+"use server";
+
 import { traced } from "braintrust";
 import { generateText } from "ai";
 import { google } from "@ai-sdk/google";

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { promptChain } from "@/actions/prompt-chain/prompt-chain-code";
+import { promptChain } from "@/actions/prompt-chain/trace-sample3-code";
 
 export function PromptChain() {
   const [input, setInput] = useState("");
